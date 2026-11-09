@@ -1,0 +1,54 @@
+// Password spray hunt (T1110.003)
+// Table: SigninLogs
+// Needs the Entra ID connector "Sign-in logs" and Entra ID P1 or P2 to stream that table.
+//
+// Default bar: at least 6 failures and at least 3 distinct users from one IP
+// inside a 15 minute bin. One lab pass is 4 users x 3 wrong passwords.
+// Lower MinUsers or MinFailures if your rows are split across bins, and record the change.
+//
+// ResultType is a string in SigninLogs.
+// 50126 invalid password, 50053 locked, 50055 expired, 50056 null or invalid password.
+// Add any other failure code you actually saw in the portal.
+
+let Lookback = 1d;
+let BinSize = 15m;
+let MinUsers = 3;
+let MinFailures = 6;
+SigninLogs
+| where TimeGenerated > ago(Lookback)
+| where ResultType in ("50126", "50053", "50055", "50056")
+| where isnotempty(UserPrincipalName)
+| summarize
+    FailureCount = count(),
+    UserCount = dcount(UserPrincipalName),
+    Users = make_set(UserPrincipalName, 50),
+    Applications = make_set(AppDisplayName, 20),
+    ClientApps = make_set(ClientAppUsed, 20),
+    ErrorCodes = make_set(ResultType, 10),
+    FailureReasons = make_set(ResultDescription, 10),
+    FirstSeen = min(TimeGenerated),
+    LastSeen = max(TimeGenerated)
+    by IPAddress, bin(TimeGenerated, BinSize)
+| where FailureCount >= MinFailures and UserCount >= MinUsers
+| order by FailureCount desc
+
+// Optional second hunt, run on its own: successful sign-ins from an IP that
+// also produced a spray in this lookback. Select from the next line down
+// and run that selection. It is commented out so this file stays one query.
+//
+// let Lookback = 1d;
+// let BinSize = 15m;
+// let MinUsers = 3;
+// let MinFailures = 6;
+// let SprayIps = SigninLogs
+//     | where TimeGenerated > ago(Lookback)
+//     | where ResultType in ("50126", "50053", "50055", "50056")
+//     | summarize FailureCount = count(), UserCount = dcount(UserPrincipalName) by IPAddress, bin(TimeGenerated, BinSize)
+//     | where FailureCount >= MinFailures and UserCount >= MinUsers
+//     | distinct IPAddress;
+// SigninLogs
+// | where TimeGenerated > ago(Lookback)
+// | where ResultType == "0"
+// | where IPAddress in (SprayIps)
+// | project TimeGenerated, UserPrincipalName, IPAddress, Location, AppDisplayName, ClientAppUsed, AuthenticationRequirement, ConditionalAccessStatus
+// | order by TimeGenerated desc

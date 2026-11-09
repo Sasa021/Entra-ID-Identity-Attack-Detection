@@ -1,0 +1,34 @@
+{
+  "displayName": "LAB DESIGN: Require MFA for medium or high sign-in risk",
+  "state": "enabledForReportingButNotEnforced",
+  "conditions": {
+    "signInRiskLevels": [
+      "high",
+      "medium"
+    ],
+    "clientAppTypes": [
+      "browser",
+      "mobileAppsAndDesktopClients"
+    ],
+    "applications": {
+      "includeApplications": [
+        "All"
+      ]
+    },
+    "users": {
+      "includeUsers": [
+        "All"
+      ],
+      "excludeUsers": [
+        "REPLACE_WITH_EMERGENCY_ACCESS_1_OBJECT_ID",
+        "REPLACE_WITH_EMERGENCY_ACCESS_2_OBJECT_ID"
+      ]
+    }
+  },
+  "grantControls": {
+    "operator": "OR",
+    "builtInControls": [
+      "mfa"
+    ]
+  }
+}

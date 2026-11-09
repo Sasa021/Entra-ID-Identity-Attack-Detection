@@ -1,0 +1,38 @@
+{
+  "displayName": "LAB DESIGN: Require MFA outside home country",
+  "state": "enabledForReportingButNotEnforced",
+  "conditions": {
+    "clientAppTypes": [
+      "browser",
+      "mobileAppsAndDesktopClients"
+    ],
+    "applications": {
+      "includeApplications": [
+        "All"
+      ]
+    },
+    "users": {
+      "includeUsers": [
+        "All"
+      ],
+      "excludeUsers": [
+        "REPLACE_WITH_EMERGENCY_ACCESS_1_OBJECT_ID",
+        "REPLACE_WITH_EMERGENCY_ACCESS_2_OBJECT_ID"
+      ]
+    },
+    "locations": {
+      "includeLocations": [
+        "All"
+      ],
+      "excludeLocations": [
+        "REPLACE_WITH_HOME_COUNTRY_NAMED_LOCATION_ID"
+      ]
+    }
+  },
+  "grantControls": {
+    "operator": "OR",
+    "builtInControls": [
+      "mfa"
+    ]
+  }
+}

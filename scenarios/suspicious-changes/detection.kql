@@ -1,0 +1,53 @@
+// Suspicious account changes (T1098 Account Manipulation, T1098.003 Additional Cloud Roles)
+// Table: AuditLogs
+// Audit log streaming is available on Entra ID Free. Sign-in log streaming is not required.
+//
+// MFA registration activities are from the UserManagement category.
+// Role assignment activities are from RoleManagement and contain "member to role",
+// which also covers the longer Privileged Identity Management operation names.
+//
+// If a query returns a lot of ordinary directory noise, add a filter on TargetUpn
+// for your lab users after you have seen the raw rows, and mention that filter
+// in the report. Do not hide the actor.
+
+let Lookback = 14d;
+AuditLogs
+| where TimeGenerated > ago(Lookback)
+| where
+    (
+        Category == "UserManagement"
+        and OperationName in (
+            "User registered security info",
+            "Admin registered security info",
+            "User registered all required security info",
+            "User deleted security info",
+            "Admin deleted security info",
+            "User started security info registration"
+        )
+    )
+    or
+    (
+        Category == "RoleManagement"
+        and OperationName has "member to role"
+    )
+| extend ActorUpn = tostring(InitiatedBy.user.userPrincipalName)
+| extend ActorIp = tostring(InitiatedBy.user.ipAddress)
+| extend ActorApp = tostring(InitiatedBy.app.displayName)
+| extend TargetUpn = tostring(TargetResources[0].userPrincipalName)
+| extend TargetName = tostring(TargetResources[0].displayName)
+| extend TargetType = tostring(TargetResources[0].type)
+| extend ModifiedProperties = tostring(TargetResources[0].modifiedProperties)
+| project
+    TimeGenerated,
+    Category,
+    OperationName,
+    Result,
+    ActorUpn,
+    ActorIp,
+    ActorApp,
+    TargetUpn,
+    TargetName,
+    TargetType,
+    ModifiedProperties,
+    CorrelationId
+| order by TimeGenerated desc
