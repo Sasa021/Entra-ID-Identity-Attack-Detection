@@ -1,0 +1,53 @@
+// Impossible travel hunt (T1078.004 Valid Accounts: Cloud Accounts)
+// Table: SigninLogs
+// Does not need Entra ID P2. It compares two successful sign-ins for the same
+// user from different countries inside MaxMinutes.
+//
+// Identity Protection risk events are optional. See the commented hunt at the bottom.
+// Blank LocationDetails.countryOrRegion rows are dropped. If your VPN row has no
+// country, this query will not pair it. Say that in the report and keep the portal screenshot.
+
+let Lookback = 2d;
+let MaxMinutes = 120;
+SigninLogs
+| where TimeGenerated > ago(Lookback)
+| where ResultType == "0"
+| extend Country = tostring(LocationDetails.countryOrRegion)
+| extend City = tostring(LocationDetails.city)
+| where isnotempty(Country)
+| sort by UserPrincipalName asc, TimeGenerated asc
+| serialize
+| extend
+    PrevCountry = prev(Country),
+    PrevCity = prev(City),
+    PrevTime = prev(TimeGenerated),
+    PrevUser = prev(UserPrincipalName),
+    PrevIP = prev(IPAddress)
+| where UserPrincipalName == PrevUser and Country != PrevCountry
+| extend MinutesBetween = datetime_diff("minute", TimeGenerated, PrevTime)
+| where MinutesBetween >= 0 and MinutesBetween <= MaxMinutes
+| project
+    TimeGenerated,
+    UserPrincipalName,
+    MinutesBetween,
+    PrevTime,
+    PrevCity,
+    PrevCountry,
+    PrevIP,
+    City,
+    Country,
+    IPAddress,
+    AppDisplayName,
+    AuthenticationRequirement,
+    RiskLevelDuringSignIn,
+    RiskEventTypes_V2
+| order by TimeGenerated desc
+
+// Optional P2 hunt. Run this selection on its own. It returns rows only when
+// SigninLogs already carries risk event names. An empty result is valid.
+//
+// SigninLogs
+// | where TimeGenerated > ago(2d)
+// | where tostring(RiskEventTypes_V2) has_any ("unlikelyTravel", "unfamiliarFeatures", "newCountry", "anonymizedIPAddress")
+// | project TimeGenerated, UserPrincipalName, IPAddress, Location, ResultType, RiskLevelDuringSignIn, RiskState, RiskEventTypes_V2, AppDisplayName
+// | order by TimeGenerated desc

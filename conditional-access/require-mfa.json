@@ -1,0 +1,30 @@
+{
+  "displayName": "LAB DESIGN: Require multifactor authentication",
+  "state": "enabledForReportingButNotEnforced",
+  "conditions": {
+    "clientAppTypes": [
+      "browser",
+      "mobileAppsAndDesktopClients"
+    ],
+    "applications": {
+      "includeApplications": [
+        "All"
+      ]
+    },
+    "users": {
+      "includeUsers": [
+        "All"
+      ],
+      "excludeUsers": [
+        "REPLACE_WITH_EMERGENCY_ACCESS_1_OBJECT_ID",
+        "REPLACE_WITH_EMERGENCY_ACCESS_2_OBJECT_ID"
+      ]
+    }
+  },
+  "grantControls": {
+    "operator": "OR",
+    "builtInControls": [
+      "mfa"
+    ]
+  }
+}

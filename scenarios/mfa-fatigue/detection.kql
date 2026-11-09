@@ -1,0 +1,32 @@
+// MFA fatigue hunt (T1621 Multi-Factor Authentication Request Generation)
+// Table: SigninLogs
+// Counts sign-ins where the MFA prompt was not completed, per user, per 30 minutes.
+//
+// 500121: the user did not complete the MFA prompt (denied, cancelled, or timed out).
+// 50074: strong authentication did not succeed.
+// If your lab rows use a different code, add it here and record the code in the report.
+// If 50074 on your tenant is only "MFA enrollment required" and not a denied push,
+// remove it so the count matches the prompts you denied.
+//
+// AttemptCount uses CorrelationId so a single sign-in that logs two rows is not counted twice.
+// The lab asks for 5 denies. The default threshold is 4, so one missing row still matches.
+
+let Lookback = 1d;
+let BinSize = 30m;
+let MinAttempts = 4;
+SigninLogs
+| where TimeGenerated > ago(Lookback)
+| where ResultType in ("500121", "50074")
+| where isnotempty(UserPrincipalName)
+| summarize
+    AttemptCount = dcount(CorrelationId),
+    EventCount = count(),
+    FirstSeen = min(TimeGenerated),
+    LastSeen = max(TimeGenerated),
+    IPAddresses = make_set(IPAddress, 20),
+    Applications = make_set(AppDisplayName, 20),
+    ErrorCodes = make_set(ResultType, 10),
+    FailureReasons = make_set(ResultDescription, 10)
+    by UserPrincipalName, bin(TimeGenerated, BinSize)
+| where AttemptCount >= MinAttempts
+| order by AttemptCount desc

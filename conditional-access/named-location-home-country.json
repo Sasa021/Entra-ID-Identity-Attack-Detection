@@ -1,0 +1,8 @@
+{
+  "@odata.type": "#microsoft.graph.countryNamedLocation",
+  "displayName": "LAB Home country",
+  "countriesAndRegions": [
+    "ZA"
+  ],
+  "includeUnknownCountriesAndRegions": false
+}

@@ -1,0 +1,30 @@
+{
+  "displayName": "LAB DESIGN: Block legacy authentication",
+  "state": "enabledForReportingButNotEnforced",
+  "conditions": {
+    "clientAppTypes": [
+      "exchangeActiveSync",
+      "other"
+    ],
+    "applications": {
+      "includeApplications": [
+        "All"
+      ]
+    },
+    "users": {
+      "includeUsers": [
+        "All"
+      ],
+      "excludeUsers": [
+        "REPLACE_WITH_EMERGENCY_ACCESS_1_OBJECT_ID",
+        "REPLACE_WITH_EMERGENCY_ACCESS_2_OBJECT_ID"
+      ]
+    }
+  },
+  "grantControls": {
+    "operator": "OR",
+    "builtInControls": [
+      "block"
+    ]
+  }
+}

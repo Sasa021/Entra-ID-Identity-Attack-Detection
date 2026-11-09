@@ -1,0 +1,37 @@
+{
+  "displayName": "LAB DESIGN: Block security info registration outside home country",
+  "state": "enabledForReportingButNotEnforced",
+  "conditions": {
+    "clientAppTypes": [
+      "all"
+    ],
+    "applications": {
+      "includeUserActions": [
+        "urn:user:registersecurityinfo"
+      ]
+    },
+    "users": {
+      "includeUsers": [
+        "All"
+      ],
+      "excludeUsers": [
+        "REPLACE_WITH_EMERGENCY_ACCESS_1_OBJECT_ID",
+        "REPLACE_WITH_EMERGENCY_ACCESS_2_OBJECT_ID"
+      ]
+    },
+    "locations": {
+      "includeLocations": [
+        "All"
+      ],
+      "excludeLocations": [
+        "REPLACE_WITH_HOME_COUNTRY_NAMED_LOCATION_ID"
+      ]
+    }
+  },
+  "grantControls": {
+    "operator": "OR",
+    "builtInControls": [
+      "block"
+    ]
+  }
+}

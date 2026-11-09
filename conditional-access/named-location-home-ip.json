@@ -1,0 +1,11 @@
+{
+  "@odata.type": "#microsoft.graph.ipNamedLocation",
+  "displayName": "LAB Home IP",
+  "isTrusted": false,
+  "ipRanges": [
+    {
+      "@odata.type": "#microsoft.graph.iPv4CidrRange",
+      "cidrAddress": "REPLACE_WITH_YOUR_PUBLIC_IP/32"
+    }
+  ]
+}

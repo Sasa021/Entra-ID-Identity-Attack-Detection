@@ -1,0 +1,27 @@
+# Editor and operating system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Secrets and local configuration
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+*.p12
+*.cer
+secrets/
+*.secret
+
+# Portal exports and captures are hard to redact fully
+exports/
+*.csv
+*.jsonl
+*.har
+*.zip
+
+# Keep unredacted screenshots on your machine only
+evidence/unredacted/
